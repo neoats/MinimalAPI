@@ -1,0 +1,2 @@
+-This is the minimal api without controller
+-In this project used storedprocedure for database operations
