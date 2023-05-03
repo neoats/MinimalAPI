@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
+﻿using Core.Utilities.Constants;
+using Core.Utilities.Results;
 using DataAccessLayer.Data;
 using DataAccessLayer.Models;
+using Microsoft.AspNetCore.Mvc;
+using IResult = Microsoft.AspNetCore.Http.IResult;
+
 
 namespace MinimalAPI.Controllers
 {
@@ -18,31 +21,33 @@ namespace MinimalAPI.Controllers
 
         }
 
-        public static async Task<IResult> GetUsers(IUserData data)
+        public static async Task<IActionResult> GetUsers(IUserData data)
         {
             try
             {
-
-                return Results.Ok(await data.GetUsers());
+                var users = await data.GetUsers();
+                /* return Ok(new SuccessDataResult<IEnumerable<UserModel>>(users));*/
+                return new OkObjectResult(new SuccessDataResult<IEnumerable<UserModel>>(users));
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                /*  return BadRequest(new ErrorResult("badreq"));*/
+                return new BadRequestObjectResult(new ErrorResult("badreq"));
             }
         }
-        public static async Task<IResult> GetUser(int id, IUserData data)
+        public static async Task<IActionResult> GetUser(int id, IUserData data)
         {
             try
             {
                 var results = await data.GetUser(id);
-                if (results == null) return Results.NotFound();
-                return Results.Ok(results);
+                if (results == null) return new BadRequestObjectResult(new ErrorResult(Messages.UsersNotFound));
+                return new OkObjectResult(new SuccessDataResult<UserModel>(results));
 
 
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return new BadRequestObjectResult(new ErrorResult(Messages.InternalServerError));
             }
 
         }
